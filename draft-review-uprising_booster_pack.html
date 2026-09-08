@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>초벌 번역 검토 — uprising_booster_pack</title>
+<style>
+  :root {
+    --bg: #f7f6f3; --card: #ffffff; --ink: #1f2933; --muted: #6b7280;
+    --line: #e5e2dc; --accent: #2563eb; --ok: #16a34a; --okbg: #ecfdf3;
+    --no: #6b7280; --warn: #b45309; --warnbg: #fffbeb;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.55 "Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; background: var(--bg); color: var(--ink); }
+  header { position: sticky; top: 0; z-index: 10; background: var(--card); border-bottom: 1px solid var(--line); padding: 14px 20px; }
+  h1 { font-size: 18px; margin: 0 0 2px; }
+  .meta { color: var(--muted); font-size: 12.5px; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 16px 20px 80px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0; position: sticky; top: 92px; z-index: 9;
+             background: var(--bg); padding: 8px 0; }
+  .toolbar input[type=search] { flex: 1 1 220px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; background: var(--card); }
+  .chip { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+  .chip.active { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  label.toggle { font-size: 13px; color: var(--muted); display: inline-flex; gap: 5px; align-items: center; }
+  .summary { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .summary b { color: var(--ink); }
+  .batch { display: flex; gap: 8px; margin: 8px 0 16px; }
+  .batch button, .exportbar button { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 7px 12px; font-size: 13px; cursor: pointer; }
+  .batch button:hover { border-color: var(--accent); }
+  .entry { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; scroll-margin-top: 100px; }
+  .entry.accept { border-color: var(--ok); background: var(--okbg); }
+  .entry.reject { opacity: .62; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .col h3 { font-size: 12px; margin: 0 0 6px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .title { font-weight: 700; font-size: 15.5px; margin-bottom: 6px; word-break: break-word; }
+  .text { white-space: pre-wrap; font-size: 14px; word-break: break-word; }
+  .face { border-top: 1px dashed var(--line); margin-top: 8px; padding-top: 8px; }
+  .idline { font-size: 12px; color: var(--muted); margin-top: 6px; word-break: break-all; }
+  .actions { display: flex; gap: 6px; margin-top: 10px; }
+  .actions button { border-radius: 7px; padding: 5px 14px; font-size: 13px; cursor: pointer; border: 1px solid var(--line); background: #fff; }
+  .actions .yes.on { background: var(--ok); color: #fff; border-color: var(--ok); }
+  .actions .no.on { background: #e5e7eb; color: #374151; border-color: #d1d5db; font-weight: 600; }
+  .editbtn { margin-left: auto; font-size: 12.5px; }
+  textarea.edit { width: 100%; min-height: 120px; font: 13px/1.5 ui-monospace,monospace; margin-top: 8px;
+                  border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  details.terms { margin-top: 8px; font-size: 13px; }
+  details.terms summary { cursor: pointer; color: var(--warn); }
+  .exportbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line);
+               padding: 10px 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; z-index: 10; }
+  .exportbar .count { font-size: 14px; }
+  .exportbar .count b { color: var(--ok); }
+  .exportbar button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  dialog { border: 1px solid var(--line); border-radius: 12px; max-width: 720px; width: 92vw; padding: 20px; }
+  dialog textarea { width: 100%; height: 220px; font: 12px/1.5 ui-monospace,monospace; margin: 10px 0; }
+  dialog pre { background: #f3f4f6; border-radius: 8px; padding: 10px; font-size: 12.5px; white-space: pre-wrap; }
+  .hidden { display: none !important; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>초벌 번역 검토 <span style="color:var(--muted);font-weight:400">— uprising_booster_pack 팩 draft → promote</span></h1>
+  <div class="meta" id="meta"></div>
+</header>
+<div class="wrap">
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="영문/한국어/id 검색…">
+    <button class="chip active" data-f="all">전체</button>
+    <button class="chip" data-f="undecided">미결정만</button>
+    <button class="chip" data-f="accepted">승인만</button>
+    <button class="chip" data-f="rejected">미승인만</button>
+  </div>
+  <div class="summary" id="summary"></div>
+  <div class="batch">
+    <button id="batchAccept">보이는 카드 모두 승인</button>
+    <button id="batchReject">보이는 카드 모두 미승인</button>
+    <button id="clearAll">전체 초기화</button>
+  </div>
+  <div id="list"></div>
+  <footer>
+    카드 데이터는 이 HTML 생성 시점의 drafts/ko/uprising_booster_pack.json + 영문 원본 스냅샷입니다.
+    draft-generate --force 재실행 후에는 이 스크립트로 재생성하세요.
+    선택·수정 상태는 브라우저(localStorage)에 draft 내용 지문(fingerprint)과 함께 저장됩니다.
+  </footer>
+</div>
+<div class="exportbar">
+  <span class="count" id="count"></span>
+  <button class="primary" id="openExport">매니페스트 내보내기</button>
+</div>
+<dialog id="dlg">
+  <h2 style="margin:0 0 6px;font-size:16px">accept/uprising_booster_pack-draft-review.json 내보내기</h2>
+  <p style="font-size:13px;color:var(--muted);margin:4px 0">아래 JSON을 <b>accept/uprising_booster_pack-draft-review.json</b>으로 저장한 뒤:</p>
+  <pre id="applyCmds"></pre>
+  <textarea id="out" readonly></textarea>
+  <div style="display:flex;gap:8px">
+    <button id="download">파일로 저장</button>
+    <button id="copy">클립보드 복사</button>
+    <button id="closeDlg" style="margin-left:auto">닫기</button>
+  </div>
+</dialog>
+<script id="data" type="application/json">{"version": 1, "fingerprint": "f485d9a8746a", "generated_at": "2026-09-06 16:42 UTC", "pack": "uprising_booster_pack", "staged_generated_at": "2026-09-06T15:43:08.524Z", "report_id": "uprising_booster_pack-draft-1", "entries": [{"id": "cayambe_grid", "title_en": "Cayambe Grid", "title_ko": "카얌베 그리드", "text_en": "When your turn begins, place 1 advancement counter on a piece of ice protecting this server.\nWhenever the Runner approaches this server, end the run unless they pay 2[credit] for each advanced piece of ice protecting this server.\nLimit 1 <strong>region</strong> per server.", "text_ko": "당신의 차례가 시작될 때, 이 서버를 방어하는 아이스 하나에 발전 카운터 1개를 올려놓는다.\n러너가 이 서버에 접근할 때마다, 이 서버를 방어하는 발전된 아이스 하나당 2[credit]를 지불하지 않으면 런을 종료한다.\n서버당 <strong>지역</strong> 1장으로 제한된다.", "faces": []}, {"id": "cybertrooper_talut", "title_en": "Cybertrooper Talut", "title_ko": "사이버트루퍼 탈루트", "text_en": "+1[link]\nWhenever you install a non-<strong>AI</strong> <strong>icebreaker</strong>, that <strong>icebreaker</strong> gets +2 strength for the remainder of the turn.", "text_ko": "+1[link]\n<strong>AI</strong>가 아닌 <strong>아이스브레이커</strong>를 설치할 때마다, 그 <strong>아이스브레이커</strong>는 이번 차례가 끝날 때까지 +2 힘을 갖는다.", "faces": []}, {"id": "digital_rights_management", "title_en": "Digital Rights Management", "title_ko": "디지털 저작권 관리", "text_en": "Play only if the Runner did not make a successful run on HQ during their last turn.\nSearch R&D for 1 agenda and reveal it. <em>(Shuffle R&D after searching it.)</em> Add that agenda to HQ. You may install 1 card from HQ in the root of a remote server.\nYou cannot score agendas for the remainder of the turn.", "text_ko": "지난 러너의 차례에 러너가 본부(HQ)로의 런을 성공하지 않았어야만 플레이할 수 있다.\n연구개발부(R&D)에서 아젠다 1장을 검색해 공개한다. <em>(검색한 후 연구개발부(R&D)를 섞는다.)</em> 그 아젠다를 본부(HQ)에 추가한다. 본부(HQ)에서 카드 1장을 원격 서버의 루트에 설치할 수 있다.\n당신은 이번 차례가 끝날 때까지 아젠다를 득점할 수 없다.", "faces": []}, {"id": "la_costa_grid", "title_en": "La Costa Grid", "title_ko": "라 코스타 그리드", "text_en": "Remote server only.\nWhen your turn begins, place 1 advancement counter on a card in the root of this server.\nLimit 1 <strong>region</strong> per server.", "text_ko": "원격 서버에만 설치된다.\n당신의 차례가 시작될 때, 이 서버의 루트에 있는 카드 하나에 발전 카운터 1개를 올려놓는다.\n서버당 <strong>지역</strong> 1장으로 제한된다.", "faces": []}, {"id": "megaprix_qualifier", "title_en": "Megaprix Qualifier", "title_ko": "메가프리 퀄리파이어", "text_en": "When you score this agenda, if there is another copy of Megaprix Qualifier in either playerʼs score area, place 1 agenda counter on this agenda.\nWhile this agenda has a hosted agenda counter, it is worth 1 more agenda point.", "text_ko": "메가프리 퀄리파이어를 득점할 때, 어느 플레이어의 득점 영역에든 메가프리 퀄리파이어의 다른 사본이 있다면 메가프리 퀄리파이어에 아젠다 카운터 1개를 올려놓는다.\n메가프리 퀄리파이어에 호스트된 아젠다 카운터가 있는 동안, 아젠다 점수가 1점 더 높아진다.", "faces": []}, {"id": "mystic_maemi", "title_en": "Mystic Maemi", "title_ko": "신비로운 매미", "text_en": "When your turn begins and whenever you steal an agenda, place 1[credit] on this resource.\nYou can spend hosted credits to play events.\nWhen your turn ends, if there are 3 or more hosted credits, you must trash 1 card from your grip at random or trash this resource.", "text_ko": "당신의 차례가 시작될 때와 아젠다를 훔칠 때마다, 신비로운 매미에 1[credit]을 올려놓는다.\n호스트된 크레딧을 사용해 이벤트를 플레이할 수 있다.\n당신의 차례가 끝날 때, 호스트된 크레딧이 3개 이상이면 그립에서 카드 1장을 무작위로 폐기하거나 신비로운 매미를 폐기한다.", "faces": []}, {"id": "swift", "title_en": "Swift", "title_ko": "스위프트", "text_en": "+1[mu]\nThe first time each turn you play a <strong>run</strong> event, gain [click].\nLimit 1 <strong>console</strong> per player.", "text_ko": "+1[mu]\n이번 차례에 처음으로 <strong>런</strong> 이벤트를 플레이할 때, [click]을 얻는다.\n플레이어당 <strong>콘솔</strong> 1장으로 제한된다.", "faces": []}], "card_hashes": {"cayambe_grid": "7b575c25a871", "cybertrooper_talut": "047110a3ef0e", "digital_rights_management": "d396605a2ba2", "la_costa_grid": "330dba82a80d", "megaprix_qualifier": "d68c3eb36e93", "mystic_maemi": "84dc7126597a", "swift": "ded7299ec3ec"}, "pending_terms": [{"ko": "차례가", "cards": ["cayambe_grid", "cybertrooper_talut", "digital_rights_management", "la_costa_grid", "mystic_maemi", "mystic_maemi"], "card_count": 6}, {"ko": "메가프리", "cards": ["megaprix_qualifier", "megaprix_qualifier", "megaprix_qualifier", "megaprix_qualifier", "megaprix_qualifier"], "card_count": 5}, {"ko": "당신의", "cards": ["cayambe_grid", "la_costa_grid", "mystic_maemi", "mystic_maemi"], "card_count": 4}, {"ko": "올려놓는다", "cards": ["cayambe_grid", "la_costa_grid", "megaprix_qualifier", "mystic_maemi"], "card_count": 4}, {"ko": "시작될", "cards": ["cayambe_grid", "la_costa_grid", "mystic_maemi"], "card_count": 3}, {"ko": "카운터", "cards": ["cayambe_grid", "la_costa_grid", "megaprix_qualifier"], "card_count": 3}, {"ko": "1개를", "cards": ["cayambe_grid", "la_costa_grid", "megaprix_qualifier"], "card_count": 3}, {"ko": "때마다", "cards": ["cayambe_grid", "cybertrooper_talut", "mystic_maemi"], "card_count": 3}, {"ko": "1장으로", "cards": ["cayambe_grid", "la_costa_grid", "swift"], "card_count": 3}, {"ko": "제한된다", "cards": ["cayambe_grid", "la_costa_grid", "swift"], "card_count": 3}, {"ko": "이번", "cards": ["cybertrooper_talut", "digital_rights_management", "swift"], "card_count": 3}, {"ko": "끝날", "cards": ["cybertrooper_talut", "digital_rights_management", "mystic_maemi"], "card_count": 3}, {"ko": "플레이할", "cards": ["digital_rights_management", "mystic_maemi", "swift"], "card_count": 3}, {"ko": "있다", "cards": ["digital_rights_management", "digital_rights_management", "mystic_maemi"], "card_count": 3}, {"ko": "1장을", "cards": ["digital_rights_management", "digital_rights_management", "mystic_maemi"], "card_count": 3}, {"ko": "아젠다를", "cards": ["digital_rights_management", "digital_rights_management", "mystic_maemi"], "card_count": 3}, {"ko": "카드", "cards": ["digital_rights_management", "la_costa_grid", "mystic_maemi"], "card_count": 3}, {"ko": "호스트된", "cards": ["megaprix_qualifier", "mystic_maemi", "mystic_maemi"], "card_count": 3}, {"ko": "신비로운", "cards": ["mystic_maemi", "mystic_maemi", "mystic_maemi"], "card_count": 3}, {"ko": "그리드", "cards": ["cayambe_grid", "la_costa_grid"], "card_count": 2}, {"ko": "서버를", "cards": ["cayambe_grid", "cayambe_grid"], "card_count": 2}, {"ko": "방어하는", "cards": ["cayambe_grid", "cayambe_grid"], "card_count": 2}, {"ko": "아이스", "cards": ["cayambe_grid", "cayambe_grid"], "card_count": 2}, {"ko": "하나에", "cards": ["cayambe_grid", "la_costa_grid"], "card_count": 2}, {"ko": "발전", "cards": ["cayambe_grid", "la_costa_grid"], "card_count": 2}, {"ko": "러너가", "cards": ["cayambe_grid", "digital_rights_management"], "card_count": 2}, {"ko": "런을", "cards": ["cayambe_grid", "digital_rights_management"], "card_count": 2}, {"ko": "서버당", "cards": ["cayambe_grid", "la_costa_grid"], "card_count": 2}, {"ko": "<strong>지역</strong>", "cards": ["cayambe_grid", "la_costa_grid"], "card_count": 2}, {"ko": "설치할", "cards": ["cybertrooper_talut", "digital_rights_management"], "card_count": 2}, {"ko": "때까지", "cards": ["cybertrooper_talut", "digital_rights_management"], "card_count": 2}, {"ko": "차례에", "cards": ["digital_rights_management", "swift"], "card_count": 2}, {"ko": "서버의", "cards": ["digital_rights_management", "la_costa_grid"], "card_count": 2}, {"ko": "루트에", "cards": ["digital_rights_management", "la_costa_grid"], "card_count": 2}, {"ko": "득점할", "cards": ["digital_rights_management", "megaprix_qualifier"], "card_count": 2}, {"ko": "있는", "cards": ["la_costa_grid", "megaprix_qualifier"], "card_count": 2}, {"ko": "퀄리파이어에", "cards": ["megaprix_qualifier", "megaprix_qualifier"], "card_count": 2}, {"ko": "이벤트를", "cards": ["mystic_maemi", "swift"], "card_count": 2}, {"ko": "카얌베", "cards": ["cayambe_grid"], "card_count": 1}, {"ko": "서버에", "cards": ["cayambe_grid"], "card_count": 1}, {"ko": "접근할", "cards": ["cayambe_grid"], "card_count": 1}, {"ko": "발전된", "cards": ["cayambe_grid"], "card_count": 1}, {"ko": "하나당", "cards": ["cayambe_grid"], "card_count": 1}, {"ko": "2[credit]를", "cards": ["cayambe_grid"], "card_count": 1}, {"ko": "지불하지", "cards": ["cayambe_grid"], "card_count": 1}, {"ko": "않으면", "cards": ["cayambe_grid"], "card_count": 1}, {"ko": "종료한다", "cards": ["cayambe_grid"], "card_count": 1}, {"ko": "사이버트루퍼", "cards": ["cybertrooper_talut"], "card_count": 1}, {"ko": "탈루트", "cards": ["cybertrooper_talut"], "card_count": 1}, {"ko": "<strong>AI</strong>가", "cards": ["cybertrooper_talut"], "card_count": 1}, {"ko": "아닌", "cards": ["cybertrooper_talut"], "card_count": 1}, {"ko": "<strong>아이스브레이커</strong>를", "cards": ["cybertrooper_talut"], "card_count": 1}, {"ko": "<strong>아이스브레이커</strong>는", "cards": ["cybertrooper_talut"], "card_count": 1}, {"ko": "힘을", "cards": ["cybertrooper_talut"], "card_count": 1}, {"ko": "갖는다", "cards": ["cybertrooper_talut"], "card_count": 1}, {"ko": "저작권", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "관리", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "지난", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "러너의", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "본부(HQ)로의", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "성공하지", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "않았어야만", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "연구개발부(R&D)에서", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "검색해", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "공개한다", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "<em>(검색한", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "연구개발부(R&D)를", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "섞는다.)</em>", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "본부(HQ)에", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "추가한다", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "본부(HQ)에서", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "당신은", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "없다", "cards": ["digital_rights_management"], "card_count": 1}, {"ko": "코스타", "cards": ["la_costa_grid"], "card_count": 1}, {"ko": "서버에만", "cards": ["la_costa_grid"], "card_count": 1}, {"ko": "설치된다", "cards": ["la_costa_grid"], "card_count": 1}, {"ko": "퀄리파이어", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "퀄리파이어를", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "어느", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "플레이어의", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "득점", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "영역에든", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "퀄리파이어의", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "다른", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "사본이", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "있다면", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "카운터가", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "동안", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "점수가", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "1점", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "높아진다", "cards": ["megaprix_qualifier"], "card_count": 1}, {"ko": "매미", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "때와", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "훔칠", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "매미에", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "1[credit]을", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "크레딧을", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "사용해", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "크레딧이", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "3개", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "이상이면", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "그립에서", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "무작위로", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "폐기하거나", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "매미를", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "폐기한다", "cards": ["mystic_maemi"], "card_count": 1}, {"ko": "스위프트", "cards": ["swift"], "card_count": 1}, {"ko": "처음으로", "cards": ["swift"], "card_count": 1}, {"ko": "<strong>런</strong>", "cards": ["swift"], "card_count": 1}, {"ko": "[click]을", "cards": ["swift"], "card_count": 1}, {"ko": "얻는다", "cards": ["swift"], "card_count": 1}, {"ko": "플레이어당", "cards": ["swift"], "card_count": 1}, {"ko": "<strong>콘솔</strong>", "cards": ["swift"], "card_count": 1}]}</script>
+<script>
+"use strict";
+const DATA = JSON.parse(document.getElementById("data").textContent);
+const LS_KEY = "draft-review:" + DATA.pack;
+// Card-level invalidation: selections survive re-drafts of OTHER cards;
+// a card whose content hash changed has its selection dropped.
+const storedHashes = (() => { try { return JSON.parse(localStorage.getItem(LS_KEY + ":hashes") || "{}"); } catch { return {}; } })();
+const $ = (s) => document.querySelector(s);
+
+let state = {};   // id -> {decision: "accept"|"reject", title?: string, text?: string}
+try { state = JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch (e) { state = {}; }
+for (const id of Object.keys(state)) {
+  if (storedHashes[id] && DATA.card_hashes[id] !== storedHashes[id]) delete state[id];
+  if (!DATA.card_hashes[id]) delete state[id]; // card removed from the draft
+}
+const save = () => {
+  const hashes = {};
+  for (const id of Object.keys(state)) hashes[id] = DATA.card_hashes[id];
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+  localStorage.setItem(LS_KEY + ":hashes", JSON.stringify(hashes));
+};
+
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+let filter = "all";
+const decided = (id) => state[id] && state[id].decision === "accept" ? "accept" : state[id] && state[id].decision === "reject" ? "reject" : "undecided";
+function visible() {
+  const q = $("#q").value.trim().toLowerCase();
+  return DATA.entries.filter((e) => {
+    if (filter === "accepted" && decided(e.id) !== "accept") return false;
+    if (filter === "rejected" && decided(e.id) !== "reject") return false;
+    if (filter === "undecided" && decided(e.id) !== "undecided") return false;
+    if (!q) return true;
+    return (e.title_en + " " + e.title_ko + " " + e.id + " " + e.text_en + " " + e.text_ko).toLowerCase().includes(q);
+  });
+}
+
+$("#meta").textContent =
+  `생성: ${DATA.generated_at} · pack ${DATA.pack} · 초벌 생성시각 ${DATA.staged_generated_at} · 총 ${DATA.entries.length}장`;
+
+function render() {
+  const rows = visible();
+  const list = $("#list");
+  list.textContent = "";
+  const frag = document.createDocumentFragment();
+  for (const e of rows) {
+    const st = state[e.id] || {};
+    const dec = decided(e.id);
+    const d = document.createElement("div");
+    d.className = "entry" + (dec === "accept" ? " accept" : dec === "reject" ? " reject" : "");
+    d.dataset.id = e.id;
+    d.id = "card-" + e.id;
+    const tKo = st.title !== undefined ? st.title : e.title_ko;
+    const xKo = st.text !== undefined ? st.text : e.text_ko;
+    const faces = e.faces.map((f, i) => {
+      if (!f.title_en && !f.text_en && !f.title_ko && !f.text_ko) return "";
+      const ft = (st.faces && st.faces[i] && st.faces[i].title) !== undefined ? st.faces[i].title : f.title_ko;
+      const fx = (st.faces && st.faces[i] && st.faces[i].text) !== undefined ? st.faces[i].text : f.text_ko;
+      return `<div class="face"><div class="title">${escapeHtml(ft || "")}</div><div class="text">${escapeHtml(fx || "")}</div></div>`;
+    }).join("");
+    d.innerHTML =
+      `<div class="cols">
+         <div class="col"><h3>영문 원본</h3><div class="title">${escapeHtml(e.title_en)}</div><div class="text">${escapeHtml(e.text_en)}</div></div>
+         <div class="col"><h3>초벌 (한국어)${st.title !== undefined || st.text !== undefined ? " · 수정됨" : ""}</h3>
+           <div class="title">${escapeHtml(tKo)}</div><div class="text">${escapeHtml(xKo)}</div>${faces}</div>
+       </div>
+       <div class="idline">${escapeHtml(e.id)}</div>
+       <div class="actions">
+         <button class="yes${dec === "accept" ? " on" : ""}">승인</button>
+         <button class="no${dec === "reject" ? " on" : ""}">미승인</button>
+         <button class="editbtn edit">수정</button>
+       </div>`;
+    d.querySelector(".yes").onclick = () => { state[e.id] = { ...st, decision: "accept" }; save(); render(); };
+    d.querySelector(".no").onclick = () => { state[e.id] = { ...st, decision: "reject" }; save(); render(); };
+    d.querySelector(".edit").onclick = () => {
+      const existing = d.querySelector(".editwrap");
+      if (existing) { existing.remove(); return; }
+      const wrap = document.createElement("div");
+      wrap.className = "editwrap";
+      const ta = document.createElement("textarea");
+      ta.className = "edit";
+      ta.value = tKo + "\n---\n" + xKo;
+      ta.title = "첫 줄=제목, --- 구분선, 이후=본문";
+      const btns = document.createElement("div");
+      btns.style.cssText = "display:flex;gap:6px;margin-top:6px";
+      const ok = document.createElement("button");
+      ok.textContent = "수정 확인";
+      ok.style.cssText = "border-radius:7px;padding:5px 14px;font-size:13px;cursor:pointer;border:1px solid var(--ok);background:var(--ok);color:#fff";
+      const cancel = document.createElement("button");
+      cancel.textContent = "취소";
+      cancel.style.cssText = "border-radius:7px;padding:5px 14px;font-size:13px;cursor:pointer;border:1px solid var(--line);background:#fff";
+      ok.onclick = () => {
+        const parts = ta.value.split("\n---\n");
+        const next = { ...st, decision: "accept" };
+        next.title = parts[0].replace(/\n$/, "");
+        next.text = parts.slice(1).join("\n---\n").replace(/^\n/, "");
+        state[e.id] = next; save(); render();
+      };
+      cancel.onclick = () => wrap.remove();
+      btns.append(ok, cancel);
+      wrap.append(ta, btns);
+      d.querySelector(".actions").after(wrap);
+    };
+    frag.appendChild(d);
+  }
+  list.appendChild(frag);
+  const acc = DATA.entries.filter((e) => decided(e.id) === "accept").length;
+  const rej = DATA.entries.filter((e) => decided(e.id) === "reject").length;
+  $("#summary").innerHTML = `<span>총 <b>${DATA.entries.length}</b>장</span><span>승인 <b>${acc}</b></span><span>미승인 <b>${rej}</b></span><span>미결정 <b>${DATA.entries.length - acc - rej}</b></span><span>표시 중 <b>${rows.length}</b>장</span>`;
+  $("#count").innerHTML = `승인 <b>${acc}</b> / ${DATA.entries.length}장`;
+}
+
+document.querySelectorAll(".chip").forEach((b) => b.onclick = () => {
+  document.querySelectorAll(".chip").forEach((x) => x.classList.remove("active"));
+  b.classList.add("active");
+  filter = b.dataset.f;
+  render();
+});
+$("#q").addEventListener("input", render);
+$("#batchAccept").onclick = () => { for (const e of visible()) state[e.id] = { ...(state[e.id] || {}), decision: "accept" }; save(); render(); };
+$("#batchReject").onclick = () => { for (const e of visible()) state[e.id] = { ...(state[e.id] || {}), decision: "reject" }; save(); render(); };
+$("#clearAll").onclick = () => { state = {}; save(); render(); };
+
+$("#openExport").onclick = () => {
+  const decisions = {};
+  let acc = 0;
+  for (const e of DATA.entries) {
+    if (decided(e.id) === "accept") { decisions[e.id] = "accept"; acc++; }
+  }
+  const manifest = { version: 1, kind: "draft", generated_at: new Date().toISOString(), report_id: DATA.report_id, draft_decisions: decisions };
+  $("#applyCmds").textContent =
+    `node dist/cli.js promote-drafts --pack ${DATA.pack} --manifest accept/${DATA.pack}-draft-review.json --data-repo ~/workspace/netrunner-cards-json --dry-run\n` +
+    `node dist/cli.js promote-drafts --pack ${DATA.pack} --manifest accept/${DATA.pack}-draft-review.json --apply --allow-dirty --data-repo ~/workspace/netrunner-cards-json   # 실제 반영 (${acc}장; data repo에 커밋 안 된 변경이 없으면 --allow-dirty 생략 가능)\n` +
+    `node dist/cli.js mark-reviewed --cards ${DATA.entries.filter((e) => decided(e.id) === "accept").slice(0, 3).map((e) => e.id).join(",")},...   # 검토 완료 표시`;
+  $("#out").value = JSON.stringify(manifest, null, 2);
+  $("#dlg").showModal();
+};
+$("#download").onclick = () => {
+  const blob = new Blob([$("#out").value], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = DATA.pack + "-draft-review.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+$("#copy").onclick = async () => { await navigator.clipboard.writeText($("#out").value); $("#copy").textContent = "복사됨 ✓"; setTimeout(() => ($("#copy").textContent = "클립보드 복사"), 1500); };
+$("#closeDlg").onclick = () => $("#dlg").close();
+
+render();
+
+// Deep-link: #card-<id> scrolls to the card and flashes it.
+function flashCard(el) {
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  el.style.outline = "3px solid var(--accent)";
+  setTimeout(() => (el.style.outline = ""), 2000);
+}
+function jumpToHash() {
+  if (!location.hash.startsWith("#card-")) return;
+  const el = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (el) flashCard(el);
+}
+window.addEventListener("hashchange", jumpToHash);
+jumpToHash();
+</script>
+</body>
+</html>
