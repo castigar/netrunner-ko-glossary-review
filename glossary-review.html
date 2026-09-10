@@ -102,6 +102,7 @@
     <label class="toggle"><input type="checkbox" id="onlySuspect">주의 표시만</label>
     <label class="toggle"><input type="checkbox" id="onlyApproved">이미 승인만</label>
     <select id="badgeFilter"><option value="">배지 필터(전체)</option></select>
+    <label class="toggle"><input type="checkbox" id="onlyManual">직접 등록만</label>
     <label class="toggle"><input type="checkbox" id="onlyPending">미결정만</label>
     <select id="sort">
       <option value="glossary">사전 순서</option>
@@ -184,6 +185,8 @@ const visible = () => {
   const badge = $("#badgeFilter").value;
   const oc = $("#onlyConflict").checked, os = $("#onlySuspect").checked, op = $("#onlyPending").checked;
   const oa = $("#onlyApproved").checked;
+  const om = $("#onlyManual").checked;
+  const manualIds = new Set(manual.map((t) => t.id));
   let rows = DATA.entries.filter((e) => {
     if (cat !== "all" && e.category !== cat) return false;
     if (badge && !e.suspect.some(([t]) => t === badge)) return false;
@@ -191,6 +194,7 @@ const visible = () => {
     if (os && e.suspect.length === 0) return false;
     if (oa && e.status !== "approved") return false;
     if (op && state[e.id]) return false;
+    if (om && !(manualIds.has(e.id) || (e.sources || []).includes("manual:user"))) return false;
     if (q && !(e.en.toLowerCase().includes(q) || e.ko.toLowerCase().includes(q) || e.id.includes(q))) return false;
     return true;
   });
@@ -280,7 +284,7 @@ document.querySelectorAll(".chip").forEach((b) => b.onclick = () => {
   document.querySelectorAll(".chip").forEach((x) => x.classList.remove("active"));
   b.classList.add("active"); render();
 });
-for (const id of ["q", "onlyConflict", "onlySuspect", "onlyApproved", "onlyPending", "sort", "badgeFilter"]) {
+for (const id of ["q", "onlyConflict", "onlySuspect", "onlyApproved", "onlyPending", "onlyManual", "sort", "badgeFilter"]) {
   $("#" + id).addEventListener("input", render);
 }
 
