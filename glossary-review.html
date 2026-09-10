@@ -193,7 +193,7 @@ const visible = () => {
     if (oc && e.conflicts.length === 0) return false;
     if (os && e.suspect.length === 0) return false;
     if (oa && e.status !== "approved") return false;
-    if (op && state[e.id]) return false;
+    if (op && (state[e.id] || e.status === "approved")) return false;
     if (om && !(manualIds.has(e.id) || (e.sources || []).includes("manual:user"))) return false;
     if (q && !(e.en.toLowerCase().includes(q) || e.ko.toLowerCase().includes(q) || e.id.includes(q))) return false;
     return true;
