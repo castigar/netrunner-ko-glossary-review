@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>초벌 번역 검토 — midnight_sun_booster_pack</title>
+<style>
+  :root {
+    --bg: #f7f6f3; --card: #ffffff; --ink: #1f2933; --muted: #6b7280;
+    --line: #e5e2dc; --accent: #2563eb; --ok: #16a34a; --okbg: #ecfdf3;
+    --no: #6b7280; --warn: #b45309; --warnbg: #fffbeb;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.55 "Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; background: var(--bg); color: var(--ink); }
+  header { position: sticky; top: 0; z-index: 10; background: var(--card); border-bottom: 1px solid var(--line); padding: 14px 20px; }
+  h1 { font-size: 18px; margin: 0 0 2px; }
+  .meta { color: var(--muted); font-size: 12.5px; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 16px 20px 80px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0; position: sticky; top: 92px; z-index: 9;
+             background: var(--bg); padding: 8px 0; }
+  .toolbar input[type=search] { flex: 1 1 220px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; background: var(--card); }
+  .chip { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+  .chip.active { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  label.toggle { font-size: 13px; color: var(--muted); display: inline-flex; gap: 5px; align-items: center; }
+  .summary { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .summary b { color: var(--ink); }
+  .batch { display: flex; gap: 8px; margin: 8px 0 16px; }
+  .batch button, .exportbar button { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 7px 12px; font-size: 13px; cursor: pointer; }
+  .batch button:hover { border-color: var(--accent); }
+  .entry { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; scroll-margin-top: 100px; }
+  .entry.accept { border-color: var(--ok); background: var(--okbg); }
+  .entry.reject { opacity: .62; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .col h3 { font-size: 12px; margin: 0 0 6px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .title { font-weight: 700; font-size: 15.5px; margin-bottom: 6px; word-break: break-word; }
+  .text { white-space: pre-wrap; font-size: 14px; word-break: break-word; }
+  .face { border-top: 1px dashed var(--line); margin-top: 8px; padding-top: 8px; }
+  .idline { font-size: 12px; color: var(--muted); margin-top: 6px; word-break: break-all; }
+  .actions { display: flex; gap: 6px; margin-top: 10px; }
+  .actions button { border-radius: 7px; padding: 5px 14px; font-size: 13px; cursor: pointer; border: 1px solid var(--line); background: #fff; }
+  .actions .yes.on { background: var(--ok); color: #fff; border-color: var(--ok); }
+  .actions .no.on { background: #e5e7eb; color: #374151; border-color: #d1d5db; font-weight: 600; }
+  .editbtn { margin-left: auto; font-size: 12.5px; }
+  textarea.edit { width: 100%; min-height: 120px; font: 13px/1.5 ui-monospace,monospace; margin-top: 8px;
+                  border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  details.terms { margin-top: 8px; font-size: 13px; }
+  details.terms summary { cursor: pointer; color: var(--warn); }
+  .exportbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line);
+               padding: 10px 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; z-index: 10; }
+  .exportbar .count { font-size: 14px; }
+  .exportbar .count b { color: var(--ok); }
+  .exportbar button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  dialog { border: 1px solid var(--line); border-radius: 12px; max-width: 720px; width: 92vw; padding: 20px; }
+  dialog textarea { width: 100%; height: 220px; font: 12px/1.5 ui-monospace,monospace; margin: 10px 0; }
+  dialog pre { background: #f3f4f6; border-radius: 8px; padding: 10px; font-size: 12.5px; white-space: pre-wrap; }
+  .hidden { display: none !important; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>초벌 번역 검토 <span style="color:var(--muted);font-weight:400">— midnight_sun_booster_pack 팩 draft → promote</span></h1>
+  <div class="meta" id="meta"></div>
+</header>
+<div class="wrap">
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="영문/한국어/id 검색…">
+    <button class="chip active" data-f="all">전체</button>
+    <button class="chip" data-f="undecided">미결정만</button>
+    <button class="chip" data-f="accepted">승인만</button>
+    <button class="chip" data-f="rejected">미승인만</button>
+  </div>
+  <div class="summary" id="summary"></div>
+  <div class="batch">
+    <button id="batchAccept">보이는 카드 모두 승인</button>
+    <button id="batchReject">보이는 카드 모두 미승인</button>
+    <button id="clearAll">전체 초기화</button>
+  </div>
+  <div id="list"></div>
+  <footer>
+    카드 데이터는 이 HTML 생성 시점의 drafts/ko/midnight_sun_booster_pack.json + 영문 원본 스냅샷입니다.
+    draft-generate --force 재실행 후에는 이 스크립트로 재생성하세요.
+    선택·수정 상태는 브라우저(localStorage)에 draft 내용 지문(fingerprint)과 함께 저장됩니다.
+  </footer>
+</div>
+<div class="exportbar">
+  <span class="count" id="count"></span>
+  <button class="primary" id="openExport">매니페스트 내보내기</button>
+  <button id="copyUrl">결정 URL 복사</button>
+</div>
+<dialog id="dlg">
+  <h2 style="margin:0 0 6px;font-size:16px">accept/midnight_sun_booster_pack-draft-review.json 내보내기</h2>
+  <p style="font-size:13px;color:var(--muted);margin:4px 0">아래 JSON을 <b>accept/midnight_sun_booster_pack-draft-review.json</b>으로 저장한 뒤:</p>
+  <pre id="applyCmds"></pre>
+  <textarea id="out" readonly></textarea>
+  <div style="display:flex;gap:8px">
+    <button id="download">파일로 저장</button>
+    <button id="copy">클립보드 복사</button>
+    <button id="closeDlg" style="margin-left:auto">닫기</button>
+  </div>
+</dialog>
+<script id="data" type="application/json">{"version": 1, "fingerprint": "d1725f7c0844", "generated_at": "2026-09-10 12:25 UTC", "pack": "midnight_sun_booster_pack", "staged_generated_at": "2026-09-10T12:25:31.881Z", "report_id": "midnight_sun_booster_pack-draft-1", "entries": [{"id": "anemone", "title_en": "Anemone", "title_ko": "아네모네", "text_en": "When you rez this ice during a run against this server, you may trash 1 card from HQ to do 2 net damage.\n[subroutine] Do 1 net damage.", "text_ko": "이 서버에 대한 런 중에 아네모네를 레즈할 때, 넷 피해 2점을 입히기 위해 본부(HQ)에서 카드 1장을 폐기할 수 있다.\n[subroutine] 넷 피해 1점을 입힌다.", "faces": []}, {"id": "azef_protocol", "title_en": "Azef Protocol", "title_ko": "아제프 프로토콜", "text_en": "As an additional cost to score this agenda, trash 1 of your other installed cards.\nWhen you score this agenda, do 2 meat damage.", "text_ko": "아제프 프로토콜을 득점하는 추가 비용으로, 설치된 당신의 다른 카드 중 1장을 폐기한다.\n아제프 프로토콜을 득점할 때, 육체 피해 2점을 입힌다.", "faces": []}, {"id": "deep_dive", "title_en": "Deep Dive", "title_ko": "딥 다이브", "text_en": "Play only if you made a successful run on HQ, R&D, and Archives this turn.\nThe Corp must set aside the top 8 cards of R&D faceup. Access 1 of those cards. You may spend [click] to access another 1 of those cards. Then, the Corp shuffles the set-aside cards into R&D.", "text_ko": "당신이 이번 차례 중에 본부(HQ)와 연구개발부(R&D), 기록보관소에 런을 성공해야만 플레이할 수 있다.\n코퍼는 연구개발부(R&D)의 맨 위 카드 8장을 앞면이 보이도록 따로 떼어놓아야 한다. 그 카드 중 1장에 액세스한다. [click]을 사용하여 그 카드 중 다른 1장에 액세스할 수 있다. 그 후, 코퍼는 따로 떼어놓은 카드들을 연구개발부(R&D)에 섞어 넣는다.", "faces": []}, {"id": "hakarl_1_0", "title_en": "Hákarl 1.0", "title_ko": "하칼 1.0", "text_en": "When you rez this ice during a run against this server, you may derez another installed card. If you do, the Runner cannot use paid abilities printed on <strong>bioroid</strong> ice for the remainder of this turn.\n<strong>Lose [click]:</strong> Break 1 subroutine on this ice. Only the Runner can use this ability.\n[subroutine] Do 1 core damage.\n[subroutine] End the run.", "text_ko": "이 서버에 대한 런 중에 하칼 1.0을 레즈할 때, 설치된 다른 카드 1장을 디레즈할 수 있다. 그렇게 하면, 러너는 이번 차례 동안 <strong>바이오로이드</strong> 아이스에 인쇄된 유료 능력을 사용할 수 없다.\n<strong>[click] 잃기:</strong> 하칼 1.0에서 서브루틴 1개를 깬다. 오직 러너만 이 능력을 사용할 수 있다.\n[subroutine] 코어 피해 1점을 입힌다.\n[subroutine] 런을 종료한다.", "faces": []}, {"id": "light_the_fire", "title_en": "Light the Fire!", "title_ko": "불을 붙여라!", "text_en": "[click], [trash], <strong>suffer 1 core damage:</strong> Run a remote server. During that run, cards in the root of the attacked server lose all abilities. When that run is successful, trash all cards in the root of the attacked server.", "text_ko": "[click], [trash], <strong>코어 피해 1점 입음:</strong> 원격 서버로 런을 수행한다. 그 런 동안, 공격받는 서버의 루트에 있는 카드들은 모든 능력을 잃는다. 그 런이 성공하면, 공격받는 서버의 루트에 있는 모든 카드를 폐기한다.", "faces": []}, {"id": "revolver", "title_en": "Revolver", "title_ko": "리볼버", "text_en": "When you install this program, place 6 power counters on it.\nInterface → [trash] or <strong>hosted power counter:</strong> Break 1 <strong>sentry</strong> subroutine.\n<strong>2[credit]:</strong> +3 strength.", "text_ko": "리볼버를 설치할 때, 리볼버 위에 파워 카운터 6개를 올려놓는다.\n인터페이스 → [trash] 또는 <strong>호스트된 파워 카운터:</strong> <strong>파수</strong> 서브루틴 1개를 깬다.\n<strong>2[credit]:</strong> +3 힘.", "faces": []}, {"id": "vladisibirsk_city_grid", "title_en": "Vladisibirsk City Grid", "title_ko": "블라디시비르스크 시티 그리드", "text_en": "You can advance this upgrade.\nOnce per turn → <strong>2 hosted advancement counters:</strong> Place 2 advancement counters on another card you can advance in the root of this server.\nLimit 1 <strong>region</strong> per server.", "text_ko": "블라디시비르스크 시티 그리드는 발전될 수 있다.\n차례당 1회 → <strong>호스트된 발전 카운터 2개:</strong> 이 서버의 루트에 있는 발전시킬 수 있는 다른 카드 위에 발전 카운터 2개를 올려놓는다.\n서버당 <strong>지역</strong> 1장으로 제한된다.", "faces": []}], "card_hashes": {"anemone": "c6e5df9e4c06", "azef_protocol": "af6995b1f9d8", "deep_dive": "dbdb4b16ac8f", "hakarl_1_0": "ce32b260c5dc", "light_the_fire": "c6e71e6b0348", "revolver": "7791246a74ac", "vladisibirsk_city_grid": "5f373b598ac4"}, "pending_terms": [{"ko": "카드", "cards": ["anemone", "azef_protocol", "deep_dive", "deep_dive", "deep_dive", "hakarl_1_0", "vladisibirsk_city_grid"], "card_count": 7}, {"ko": "있다", "cards": ["anemone", "deep_dive", "deep_dive", "hakarl_1_0", "hakarl_1_0", "vladisibirsk_city_grid"], "card_count": 6}, {"ko": "피해", "cards": ["anemone", "anemone", "azef_protocol", "hakarl_1_0", "light_the_fire"], "card_count": 5}, {"ko": "다른", "cards": ["azef_protocol", "deep_dive", "hakarl_1_0", "vladisibirsk_city_grid"], "card_count": 4}, {"ko": "있는", "cards": ["light_the_fire", "light_the_fire", "vladisibirsk_city_grid", "vladisibirsk_city_grid"], "card_count": 4}, {"ko": "중에", "cards": ["anemone", "deep_dive", "hakarl_1_0"], "card_count": 3}, {"ko": "1장을", "cards": ["anemone", "azef_protocol", "hakarl_1_0"], "card_count": 3}, {"ko": "입힌다", "cards": ["anemone", "azef_protocol", "hakarl_1_0"], "card_count": 3}, {"ko": "아제프", "cards": ["azef_protocol", "azef_protocol", "azef_protocol"], "card_count": 3}, {"ko": "런을", "cards": ["deep_dive", "hakarl_1_0", "light_the_fire"], "card_count": 3}, {"ko": "하칼", "cards": ["hakarl_1_0", "hakarl_1_0", "hakarl_1_0"], "card_count": 3}, {"ko": "능력을", "cards": ["hakarl_1_0", "hakarl_1_0", "light_the_fire"], "card_count": 3}, {"ko": "서버의", "cards": ["light_the_fire", "light_the_fire", "vladisibirsk_city_grid"], "card_count": 3}, {"ko": "루트에", "cards": ["light_the_fire", "light_the_fire", "vladisibirsk_city_grid"], "card_count": 3}, {"ko": "카운터", "cards": ["revolver", "vladisibirsk_city_grid", "vladisibirsk_city_grid"], "card_count": 3}, {"ko": "서버에", "cards": ["anemone", "hakarl_1_0"], "card_count": 2}, {"ko": "대한", "cards": ["anemone", "hakarl_1_0"], "card_count": 2}, {"ko": "레즈할", "cards": ["anemone", "hakarl_1_0"], "card_count": 2}, {"ko": "2점을", "cards": ["anemone", "azef_protocol"], "card_count": 2}, {"ko": "1점을", "cards": ["anemone", "hakarl_1_0"], "card_count": 2}, {"ko": "프로토콜을", "cards": ["azef_protocol", "azef_protocol"], "card_count": 2}, {"ko": "설치된", "cards": ["azef_protocol", "hakarl_1_0"], "card_count": 2}, {"ko": "폐기한다", "cards": ["azef_protocol", "light_the_fire"], "card_count": 2}, {"ko": "이번", "cards": ["deep_dive", "hakarl_1_0"], "card_count": 2}, {"ko": "차례", "cards": ["deep_dive", "hakarl_1_0"], "card_count": 2}, {"ko": "코퍼는", "cards": ["deep_dive", "deep_dive"], "card_count": 2}, {"ko": "따로", "cards": ["deep_dive", "deep_dive"], "card_count": 2}, {"ko": "1장에", "cards": ["deep_dive", "deep_dive"], "card_count": 2}, {"ko": "동안", "cards": ["hakarl_1_0", "light_the_fire"], "card_count": 2}, {"ko": "사용할", "cards": ["hakarl_1_0", "hakarl_1_0"], "card_count": 2}, {"ko": "서브루틴", "cards": ["hakarl_1_0", "revolver"], "card_count": 2}, {"ko": "1개를", "cards": ["hakarl_1_0", "revolver"], "card_count": 2}, {"ko": "깬다", "cards": ["hakarl_1_0", "revolver"], "card_count": 2}, {"ko": "공격받는", "cards": ["light_the_fire", "light_the_fire"], "card_count": 2}, {"ko": "모든", "cards": ["light_the_fire", "light_the_fire"], "card_count": 2}, {"ko": "위에", "cards": ["revolver", "vladisibirsk_city_grid"], "card_count": 2}, {"ko": "파워", "cards": ["revolver", "revolver"], "card_count": 2}, {"ko": "올려놓는다", "cards": ["revolver", "vladisibirsk_city_grid"], "card_count": 2}, {"ko": "<strong>호스트된", "cards": ["revolver", "vladisibirsk_city_grid"], "card_count": 2}, {"ko": "블라디시비르스크", "cards": ["vladisibirsk_city_grid", "vladisibirsk_city_grid"], "card_count": 2}, {"ko": "시티", "cards": ["vladisibirsk_city_grid", "vladisibirsk_city_grid"], "card_count": 2}, {"ko": "발전", "cards": ["vladisibirsk_city_grid", "vladisibirsk_city_grid"], "card_count": 2}, {"ko": "아네모네를", "cards": ["anemone"], "card_count": 1}, {"ko": "입히기", "cards": ["anemone"], "card_count": 1}, {"ko": "위해", "cards": ["anemone"], "card_count": 1}, {"ko": "본부(HQ)에서", "cards": ["anemone"], "card_count": 1}, {"ko": "폐기할", "cards": ["anemone"], "card_count": 1}, {"ko": "프로토콜", "cards": ["azef_protocol"], "card_count": 1}, {"ko": "득점하는", "cards": ["azef_protocol"], "card_count": 1}, {"ko": "추가", "cards": ["azef_protocol"], "card_count": 1}, {"ko": "비용으로", "cards": ["azef_protocol"], "card_count": 1}, {"ko": "당신의", "cards": ["azef_protocol"], "card_count": 1}, {"ko": "득점할", "cards": ["azef_protocol"], "card_count": 1}, {"ko": "육체", "cards": ["azef_protocol"], "card_count": 1}, {"ko": "다이브", "cards": ["deep_dive"], "card_count": 1}, {"ko": "당신이", "cards": ["deep_dive"], "card_count": 1}, {"ko": "본부(HQ)와", "cards": ["deep_dive"], "card_count": 1}, {"ko": "연구개발부(R&D", "cards": ["deep_dive"], "card_count": 1}, {"ko": "기록보관소에", "cards": ["deep_dive"], "card_count": 1}, {"ko": "성공해야만", "cards": ["deep_dive"], "card_count": 1}, {"ko": "플레이할", "cards": ["deep_dive"], "card_count": 1}, {"ko": "연구개발부(R&D)의", "cards": ["deep_dive"], "card_count": 1}, {"ko": "8장을", "cards": ["deep_dive"], "card_count": 1}, {"ko": "앞면이", "cards": ["deep_dive"], "card_count": 1}, {"ko": "보이도록", "cards": ["deep_dive"], "card_count": 1}, {"ko": "떼어놓아야", "cards": ["deep_dive"], "card_count": 1}, {"ko": "한다", "cards": ["deep_dive"], "card_count": 1}, {"ko": "액세스한다", "cards": ["deep_dive"], "card_count": 1}, {"ko": "[click]을", "cards": ["deep_dive"], "card_count": 1}, {"ko": "사용하여", "cards": ["deep_dive"], "card_count": 1}, {"ko": "액세스할", "cards": ["deep_dive"], "card_count": 1}, {"ko": "떼어놓은", "cards": ["deep_dive"], "card_count": 1}, {"ko": "카드들을", "cards": ["deep_dive"], "card_count": 1}, {"ko": "연구개발부(R&D)에", "cards": ["deep_dive"], "card_count": 1}, {"ko": "섞어", "cards": ["deep_dive"], "card_count": 1}, {"ko": "넣는다", "cards": ["deep_dive"], "card_count": 1}, {"ko": "1.0을", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "디레즈할", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "그렇게", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "하면", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "러너는", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "<strong>바이오로이드</strong>", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "아이스에", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "인쇄된", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "유료", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "없다", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "잃기:</strong>", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "1.0에서", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "오직", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "러너만", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "코어", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "종료한다", "cards": ["hakarl_1_0"], "card_count": 1}, {"ko": "불을", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "붙여라", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "<strong>코어", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "1점", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "입음:</strong>", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "서버로", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "수행한다", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "카드들은", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "잃는다", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "런이", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "성공하면", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "카드를", "cards": ["light_the_fire"], "card_count": 1}, {"ko": "리볼버를", "cards": ["revolver"], "card_count": 1}, {"ko": "설치할", "cards": ["revolver"], "card_count": 1}, {"ko": "6개를", "cards": ["revolver"], "card_count": 1}, {"ko": "인터페이스", "cards": ["revolver"], "card_count": 1}, {"ko": "또는", "cards": ["revolver"], "card_count": 1}, {"ko": "카운터:</strong>", "cards": ["revolver"], "card_count": 1}, {"ko": "<strong>파수</strong>", "cards": ["revolver"], "card_count": 1}, {"ko": "그리드", "cards": ["vladisibirsk_city_grid"], "card_count": 1}, {"ko": "그리드는", "cards": ["vladisibirsk_city_grid"], "card_count": 1}, {"ko": "발전될", "cards": ["vladisibirsk_city_grid"], "card_count": 1}, {"ko": "차례당", "cards": ["vladisibirsk_city_grid"], "card_count": 1}, {"ko": "1회", "cards": ["vladisibirsk_city_grid"], "card_count": 1}, {"ko": "2개:</strong>", "cards": ["vladisibirsk_city_grid"], "card_count": 1}, {"ko": "발전시킬", "cards": ["vladisibirsk_city_grid"], "card_count": 1}, {"ko": "2개를", "cards": ["vladisibirsk_city_grid"], "card_count": 1}, {"ko": "서버당", "cards": ["vladisibirsk_city_grid"], "card_count": 1}, {"ko": "<strong>지역</strong>", "cards": ["vladisibirsk_city_grid"], "card_count": 1}, {"ko": "1장으로", "cards": ["vladisibirsk_city_grid"], "card_count": 1}, {"ko": "제한된다", "cards": ["vladisibirsk_city_grid"], "card_count": 1}]}</script>
+<script>
+"use strict";
+const DATA = JSON.parse(document.getElementById("data").textContent);
+const LS_KEY = "draft-review:" + DATA.pack;
+// Card-level invalidation: selections survive re-drafts of OTHER cards;
+// a card whose content hash changed has its selection dropped.
+const storedHashes = (() => { try { return JSON.parse(localStorage.getItem(LS_KEY + ":hashes") || "{}"); } catch { return {}; } })();
+const $ = (s) => document.querySelector(s);
+
+let state = {};   // id -> {decision: "accept"|"reject", title?: string, text?: string}
+try { state = JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch (e) { state = {}; }
+for (const id of Object.keys(state)) {
+  if (storedHashes[id] && DATA.card_hashes[id] !== storedHashes[id]) delete state[id];
+  if (!DATA.card_hashes[id]) delete state[id]; // card removed from the draft
+}
+const save = () => {
+  const hashes = {};
+  for (const id of Object.keys(state)) hashes[id] = DATA.card_hashes[id];
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+  localStorage.setItem(LS_KEY + ":hashes", JSON.stringify(hashes));
+};
+
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+let filter = "all";
+const decided = (id) => state[id] && state[id].decision === "accept" ? "accept" : state[id] && state[id].decision === "reject" ? "reject" : "undecided";
+function visible() {
+  const q = $("#q").value.trim().toLowerCase();
+  return DATA.entries.filter((e) => {
+    if (filter === "accepted" && decided(e.id) !== "accept") return false;
+    if (filter === "rejected" && decided(e.id) !== "reject") return false;
+    if (filter === "undecided" && decided(e.id) !== "undecided") return false;
+    if (!q) return true;
+    return (e.title_en + " " + e.title_ko + " " + e.id + " " + e.text_en + " " + e.text_ko).toLowerCase().includes(q);
+  });
+}
+
+$("#meta").textContent =
+  `생성: ${DATA.generated_at} · pack ${DATA.pack} · 초벌 생성시각 ${DATA.staged_generated_at} · 총 ${DATA.entries.length}장`;
+
+function render() {
+  const rows = visible();
+  const list = $("#list");
+  list.textContent = "";
+  const frag = document.createDocumentFragment();
+  for (const e of rows) {
+    const st = state[e.id] || {};
+    const dec = decided(e.id);
+    const d = document.createElement("div");
+    d.className = "entry" + (dec === "accept" ? " accept" : dec === "reject" ? " reject" : "");
+    d.dataset.id = e.id;
+    d.id = "card-" + e.id;
+    const tKo = st.title !== undefined ? st.title : e.title_ko;
+    const xKo = st.text !== undefined ? st.text : e.text_ko;
+    const faces = e.faces.map((f, i) => {
+      if (!f.title_en && !f.text_en && !f.title_ko && !f.text_ko) return "";
+      const ft = (st.faces && st.faces[i] && st.faces[i].title) !== undefined ? st.faces[i].title : f.title_ko;
+      const fx = (st.faces && st.faces[i] && st.faces[i].text) !== undefined ? st.faces[i].text : f.text_ko;
+      return `<div class="face"><div class="title">${escapeHtml(ft || "")}</div><div class="text">${escapeHtml(fx || "")}</div></div>`;
+    }).join("");
+    d.innerHTML =
+      `<div class="cols">
+         <div class="col"><h3>영문 원본</h3><div class="title">${escapeHtml(e.title_en)}</div><div class="text">${escapeHtml(e.text_en)}</div></div>
+         <div class="col"><h3>초벌 (한국어)${st.title !== undefined || st.text !== undefined ? " · 수정됨" : ""}</h3>
+           <div class="title">${escapeHtml(tKo)}</div><div class="text">${escapeHtml(xKo)}</div>${faces}</div>
+       </div>
+       <div class="idline">${escapeHtml(e.id)}</div>
+       <div class="actions">
+         <button class="yes${dec === "accept" ? " on" : ""}">승인</button>
+         <button class="no${dec === "reject" ? " on" : ""}">미승인</button>
+         <button class="editbtn edit">수정</button>
+       </div>`;
+    d.querySelector(".yes").onclick = () => { state[e.id] = { ...st, decision: "accept" }; save(); render(); };
+    d.querySelector(".no").onclick = () => { state[e.id] = { ...st, decision: "reject" }; save(); render(); };
+    d.querySelector(".edit").onclick = () => {
+      const existing = d.querySelector(".editwrap");
+      if (existing) { existing.remove(); return; }
+      const wrap = document.createElement("div");
+      wrap.className = "editwrap";
+      const ta = document.createElement("textarea");
+      ta.className = "edit";
+      ta.value = tKo + "\n---\n" + xKo;
+      ta.title = "첫 줄=제목, --- 구분선, 이후=본문";
+      const btns = document.createElement("div");
+      btns.style.cssText = "display:flex;gap:6px;margin-top:6px";
+      const ok = document.createElement("button");
+      ok.textContent = "수정 확인";
+      ok.style.cssText = "border-radius:7px;padding:5px 14px;font-size:13px;cursor:pointer;border:1px solid var(--ok);background:var(--ok);color:#fff";
+      const cancel = document.createElement("button");
+      cancel.textContent = "취소";
+      cancel.style.cssText = "border-radius:7px;padding:5px 14px;font-size:13px;cursor:pointer;border:1px solid var(--line);background:#fff";
+      ok.onclick = () => {
+        const parts = ta.value.split("\n---\n");
+        const next = { ...st, decision: "accept" };
+        next.title = parts[0].replace(/\n$/, "");
+        next.text = parts.slice(1).join("\n---\n").replace(/^\n/, "");
+        state[e.id] = next; save(); render();
+      };
+      cancel.onclick = () => wrap.remove();
+      btns.append(ok, cancel);
+      wrap.append(ta, btns);
+      d.querySelector(".actions").after(wrap);
+    };
+    frag.appendChild(d);
+  }
+  list.appendChild(frag);
+  const acc = DATA.entries.filter((e) => decided(e.id) === "accept").length;
+  const rej = DATA.entries.filter((e) => decided(e.id) === "reject").length;
+  $("#summary").innerHTML = `<span>총 <b>${DATA.entries.length}</b>장</span><span>승인 <b>${acc}</b></span><span>미승인 <b>${rej}</b></span><span>미결정 <b>${DATA.entries.length - acc - rej}</b></span><span>표시 중 <b>${rows.length}</b>장</span>`;
+  $("#count").innerHTML = `승인 <b>${acc}</b> / ${DATA.entries.length}장`;
+}
+
+document.querySelectorAll(".chip").forEach((b) => b.onclick = () => {
+  document.querySelectorAll(".chip").forEach((x) => x.classList.remove("active"));
+  b.classList.add("active");
+  filter = b.dataset.f;
+  render();
+});
+$("#q").addEventListener("input", render);
+$("#batchAccept").onclick = () => { for (const e of visible()) state[e.id] = { ...(state[e.id] || {}), decision: "accept" }; save(); render(); };
+$("#batchReject").onclick = () => { for (const e of visible()) state[e.id] = { ...(state[e.id] || {}), decision: "reject" }; save(); render(); };
+$("#clearAll").onclick = () => { state = {}; save(); render(); };
+
+$("#openExport").onclick = () => {
+  const decisions = {};
+  let acc = 0;
+  for (const e of DATA.entries) {
+    if (decided(e.id) === "accept") { decisions[e.id] = "accept"; acc++; }
+  }
+  const manifest = { version: 1, kind: "draft", generated_at: new Date().toISOString(), report_id: DATA.report_id, draft_decisions: decisions };
+  $("#applyCmds").textContent =
+    `node dist/cli.js promote-drafts --pack ${DATA.pack} --manifest accept/${DATA.pack}-draft-review.json --data-repo ~/workspace/netrunner-cards-json --dry-run\n` +
+    `node dist/cli.js promote-drafts --pack ${DATA.pack} --manifest accept/${DATA.pack}-draft-review.json --apply --allow-dirty --data-repo ~/workspace/netrunner-cards-json   # 실제 반영 (${acc}장; data repo에 커밋 안 된 변경이 없으면 --allow-dirty 생략 가능)\n` +
+    `node dist/cli.js mark-reviewed --cards ${DATA.entries.filter((e) => decided(e.id) === "accept").slice(0, 3).map((e) => e.id).join(",")},...   # 검토 완료 표시`;
+  $("#out").value = JSON.stringify(manifest, null, 2);
+  $("#dlg").showModal();
+};
+$("#download").onclick = () => {
+  const blob = new Blob([$("#out").value], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = DATA.pack + "-draft-review.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+$("#copy").onclick = async () => { await navigator.clipboard.writeText($("#out").value); $("#copy").textContent = "복사됨 ✓"; setTimeout(() => ($("#copy").textContent = "클립보드 복사"), 1500); };
+$("#closeDlg").onclick = () => $("#dlg").close();
+
+const b64urlBytes = (bytes) => {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}; // spread 금지: 큰 payload에서 RangeError (Safari)
+const b64urlDecode = (s) =>
+  Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) =>
+    c.charCodeAt(0),
+  );
+async function deflateRaw(json) {
+  if (typeof CompressionStream === "undefined") return null;
+  const buf = await new Response(
+    new Blob([json]).stream().pipeThrough(new CompressionStream("deflate-raw")),
+  ).arrayBuffer();
+  return new Uint8Array(buf);
+}
+async function decodeRaw(bytes) {
+  return await new Response(
+    new Blob([bytes])
+      .stream()
+      .pipeThrough(new DecompressionStream("deflate-raw")),
+  ).text();
+}
+$("#copyUrl").onclick = async () => {
+  const payload = {
+    v: 1,
+    pack: DATA.pack,
+    fp: DATA.fingerprint,
+    rid: DATA.report_id,
+    s: state,
+    h: storedHashes,
+  };
+  const json = JSON.stringify(payload);
+  const deflated = await deflateRaw(json);
+  const frag = deflated
+    ? "1." + b64urlBytes(deflated)
+    : "0." + b64urlBytes(new TextEncoder().encode(json));
+  const url = location.origin + location.pathname + "#d=" + frag;
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch {
+    prompt("아래 URL을 복사하세요:", url);
+  }
+  $("#count").innerHTML = `결정 URL 복사됨 (${url.length.toLocaleString()}자)`;
+};
+
+(async () => {
+  const m = location.hash.match(/#d=(.+)/);
+  if (!m) return;
+  try {
+    const body = m[1].slice(2);
+    const json =
+      m[1][0] === "1"
+        ? await decodeRaw(b64urlDecode(body))
+        : new TextDecoder().decode(b64urlDecode(body));
+    const p = JSON.parse(json);
+    if (
+      p.v !== 1 ||
+      p.pack !== DATA.pack ||
+      p.fp !== DATA.fingerprint ||
+      p.rid !== DATA.report_id
+    ) {
+      alert("결정 URL이 이 페이지(팩/버전)와 일치하지 않습니다.");
+      return;
+    }
+    const existing = Object.keys(state).length;
+    if (
+      existing > 0 &&
+      !confirm(`저장된 검토 상태 ${existing}장을 URL 상태로 덮어쓸까요?`)
+    )
+      return;
+    state = {};
+    for (const [id, st] of Object.entries(p.s || {})) {
+      if (DATA.card_hashes[id] && p.h && p.h[id] === DATA.card_hashes[id])
+        state[id] = st;
+    }
+    try {
+      history.replaceState(null, "", location.pathname + location.search);
+    } catch {} // 재복원 방지 (file://에서 throw하는 브라우저 존재 — 실패해도 무해)
+    save();
+    render();
+  } catch (e) {
+    alert("결정 URL 해석 실패: " + (e && e.message));
+  }
+})();
+
+render();
+
+// Deep-link: #card-<id> scrolls to the card and flashes it.
+function flashCard(el) {
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  el.style.outline = "3px solid var(--accent)";
+  setTimeout(() => (el.style.outline = ""), 2000);
+}
+function jumpToHash() {
+  if (!location.hash.startsWith("#card-")) return;
+  const el = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (el) flashCard(el);
+}
+window.addEventListener("hashchange", jumpToHash);
+jumpToHash();
+</script>
+</body>
+</html>
